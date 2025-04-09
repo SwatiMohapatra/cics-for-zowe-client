@@ -9,16 +9,16 @@
  *
  */
 
-import { SessConstants } from "@zowe/imperative";
 import { imperative } from "@zowe/zowe-explorer-api";
 import { TreeItem, TreeItemCollapsibleState } from "vscode";
+import { CICSSession } from "../resources";
 import { getIconFilePathFromName } from "../utils/iconUtils";
 import { CICSPlexTree } from "./CICSPlexTree";
 import { CICSRegionTree } from "./CICSRegionTree";
 
 export class CICSSessionTree extends TreeItem {
   children: (CICSPlexTree | CICSRegionTree)[];
-  session: imperative.Session;
+  session: CICSSession;
   profile: any;
   isUnauthorized: boolean | undefined;
   iconPath = getIconFilePathFromName("profile-unverified");

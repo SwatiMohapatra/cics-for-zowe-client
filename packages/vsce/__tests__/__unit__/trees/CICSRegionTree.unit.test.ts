@@ -12,10 +12,11 @@
 const getIconByStatusMock = jest.fn();
 const getIconFilePathFromNameMock = jest.fn();
 
-import { CICSRegionTree } from "../../../src/trees/CICSRegionTree";
-import { CICSSessionTree } from "../../../src/trees/CICSSessionTree";
-import * as globalMocks from "../../__utils__/globalMocks";
 import * as vscode from "vscode";
+const defaultFilterMock = jest.fn();
+const defaultResNumberMock = jest.fn();
+defaultFilterMock.mockReturnValue("DEFAULT FITLER");
+defaultResNumberMock.mockReturnValue(10);
 
 jest.mock("../../../src/trees/CICSResourceContainerNode");
 jest.mock("../../../src/utils/iconUtils", () => {
@@ -24,6 +25,17 @@ jest.mock("../../../src/utils/iconUtils", () => {
     getIconFilePathFromName: getIconFilePathFromNameMock,
   };
 });
+
+jest.mock("../../../src/utils/PersistentStorage", () => ({
+  PersistentStorage: {
+    getDefaultFilter: defaultFilterMock,
+    getNumberOfResourcesToFetch: defaultResNumberMock,
+  },
+}));
+
+import { CICSRegionTree } from "../../../src/trees/CICSRegionTree";
+import { CICSSessionTree } from "../../../src/trees/CICSSessionTree";
+import * as globalMocks from "../../__utils__/globalMocks";
 
 const region = {
   cicsname: "cics",

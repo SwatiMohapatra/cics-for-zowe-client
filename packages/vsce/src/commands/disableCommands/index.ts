@@ -9,6 +9,7 @@
  *
  */
 
+export * from "./disableJVMServerCommand";
 export * from "./disableLocalFileCommand";
 export * from "./disableProgramCommand";
 export * from "./disableTransactionCommand";

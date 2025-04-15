@@ -12,7 +12,7 @@
 import { CicsCmciConstants, ICMCIApiResponse } from "@zowe/cics-for-zowe-sdk";
 import { ProgressLocation, TreeView, commands, window } from "vscode";
 import constants from "../../constants/CICS.defaults";
-import { JVMServerMeta } from "../../doc";
+import { BundleMeta } from "../../doc";
 import { CICSSession } from "../../resources";
 import { CICSTree } from "../../trees/CICSTree";
 import { findSelectedNodes } from "../../utils/commandUtils";
@@ -21,15 +21,15 @@ import { ICommandParams } from "../ICommandParams";
 import { evaluateTreeNodes } from "../../utils/treeUtils";
 
 /**
- * Performs enable on selected CICSJVMServer nodes.
+ * Performs enable on selected CICSBundle nodes.
  * @param tree - tree which contains the node
  * @param treeview - Tree View of current cics tree
  */
-export function getEnableJVMServerCommand(tree: CICSTree, treeview: TreeView<any>) {
-  return commands.registerCommand("cics-extension-for-zowe.enableJVMServer", async (clickedNode) => {
-    const nodes = findSelectedNodes(treeview, JVMServerMeta, clickedNode);
+export function getEnableBundleCommand(tree: CICSTree, treeview: TreeView<any>) {
+  return commands.registerCommand("cics-extension-for-zowe.enableBundle", async (clickedNode) => {
+    const nodes = findSelectedNodes(treeview, BundleMeta, clickedNode);
     if (!nodes || !nodes.length) {
-      await window.showErrorMessage("No CICS JVM Servers selected");
+      await window.showErrorMessage("No CICS Bundles selected");
       return;
     }
 
@@ -49,14 +49,14 @@ export function getEnableJVMServerCommand(tree: CICSTree, treeview: TreeView<any
           });
 
           try {
-            await enableJVMServer(node.getSession(), {
+            await enableBundle(node.getSession(), {
               name: node.getContainedResource().meta.getName(node.getContainedResource().resource),
               regionName: node.regionName,
               cicsPlex: node.cicsplexName,
             });
 
             await pollForCompleteAction(node,
-              (response) => { return response.records?.cicsjvmserver?.enablestatus.toUpperCase() === "ENABLED"; },
+              (response) => { return response.records?.cicsbundle?.enablestatus.toUpperCase() === "ENABLED"; },
               () => evaluateTreeNodes(node, tree)
             );
           } catch (error) {
@@ -73,11 +73,11 @@ export function getEnableJVMServerCommand(tree: CICSTree, treeview: TreeView<any
   });
 }
 
-function enableJVMServer(session: CICSSession, parms: ICommandParams): Promise<ICMCIApiResponse> {
+function enableBundle(session: CICSSession, parms: ICommandParams): Promise<ICMCIApiResponse> {
   return runPutResource(
     {
       session: session,
-      resourceName: CicsCmciConstants.CICS_CMCI_JVM_SERVER,
+      resourceName: CicsCmciConstants.CICS_CMCI_BUNDLE,
       cicsPlex: parms.cicsPlex,
       regionName: parms.regionName,
       params: { criteria: `NAME='${parms.name}'` },

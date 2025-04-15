@@ -12,7 +12,7 @@
 import { CicsCmciConstants, ICMCIApiResponse } from "@zowe/cics-for-zowe-sdk";
 import { ProgressLocation, TreeView, commands, window } from "vscode";
 import constants from "../../constants/CICS.defaults";
-import { JVMServerMeta } from "../../doc";
+import { BundleMeta } from "../../doc";
 import { CICSSession } from "../../resources";
 import { CICSTree } from "../../trees/CICSTree";
 import { findSelectedNodes } from "../../utils/commandUtils";
@@ -21,21 +21,21 @@ import { ICommandParams } from "../ICommandParams";
 import { evaluateTreeNodes } from "../../utils/treeUtils";
 
 /**
- * Performs enable on selected CICSJVMServer nodes.
+ * Performs disable on selected CICSBundle nodes.
  * @param tree - tree which contains the node
  * @param treeview - Tree View of current cics tree
  */
-export function getEnableJVMServerCommand(tree: CICSTree, treeview: TreeView<any>) {
-  return commands.registerCommand("cics-extension-for-zowe.enableJVMServer", async (clickedNode) => {
-    const nodes = findSelectedNodes(treeview, JVMServerMeta, clickedNode);
+export function getDisableBundleCommand(tree: CICSTree, treeview: TreeView<any>) {
+  return commands.registerCommand("cics-extension-for-zowe.disableBundle", async (clickedNode) => {
+    const nodes = findSelectedNodes(treeview, BundleMeta, clickedNode);
     if (!nodes || !nodes.length) {
-      await window.showErrorMessage("No CICS JVM Servers selected");
+      await window.showErrorMessage("No CICS Bundles selected");
       return;
     }
 
     await window.withProgress(
       {
-        title: "Enable",
+        title: "Disable",
         location: ProgressLocation.Notification,
         cancellable: false,
       },
@@ -44,24 +44,24 @@ export function getEnableJVMServerCommand(tree: CICSTree, treeview: TreeView<any
 
         for (const node of nodes) {
           progress.report({
-            message: `Enabling ${nodes.indexOf(node) + 1} of ${nodes.length}`,
+            message: `Disabling ${nodes.indexOf(node) + 1} of ${nodes.length}`,
             increment: (nodes.indexOf(node) / nodes.length) * constants.PERCENTAGE_MAX,
           });
 
           try {
-            await enableJVMServer(node.getSession(), {
+            await disableBundle(node.getSession(), {
               name: node.getContainedResource().meta.getName(node.getContainedResource().resource),
-              regionName: node.regionName,
               cicsPlex: node.cicsplexName,
+              regionName: node.regionName,
             });
 
             await pollForCompleteAction(node,
-              (response) => { return response.records?.cicsjvmserver?.enablestatus.toUpperCase() === "ENABLED"; },
+              (response) => { return response.records?.cicsbundle?.enablestatus.toUpperCase() === "DISABLED"; },
               () => evaluateTreeNodes(node, tree)
             );
           } catch (error) {
             window.showErrorMessage(
-              `Something went wrong when performing an ENABLE - ${JSON.stringify(error, Object.getOwnPropertyNames(error)).replace(
+              `Something went wrong when performing a disable - ${JSON.stringify(error, Object.getOwnPropertyNames(error)).replace(
                 /(\\n\t|\\n|\\t)/gm,
                 " "
               )}`
@@ -73,11 +73,11 @@ export function getEnableJVMServerCommand(tree: CICSTree, treeview: TreeView<any
   });
 }
 
-function enableJVMServer(session: CICSSession, parms: ICommandParams): Promise<ICMCIApiResponse> {
+function disableBundle(session: CICSSession, parms: ICommandParams): Promise<ICMCIApiResponse> {
   return runPutResource(
     {
       session: session,
-      resourceName: CicsCmciConstants.CICS_CMCI_JVM_SERVER,
+      resourceName: CicsCmciConstants.CICS_CMCI_BUNDLE,
       cicsPlex: parms.cicsPlex,
       regionName: parms.regionName,
       params: { criteria: `NAME='${parms.name}'` },
@@ -86,7 +86,7 @@ function enableJVMServer(session: CICSSession, parms: ICommandParams): Promise<I
       request: {
         action: {
           $: {
-            name: "ENABLE",
+            name: "DISABLE",
           },
         },
       },

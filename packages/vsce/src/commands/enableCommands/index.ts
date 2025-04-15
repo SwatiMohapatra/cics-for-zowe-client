@@ -9,6 +9,7 @@
  *
  */
 
+export * from "./enableBundleCommand";
 export * from "./enableJVMServerCommand";
 export * from "./enableLocalFileCommand";
 export * from "./enableProgramCommand";

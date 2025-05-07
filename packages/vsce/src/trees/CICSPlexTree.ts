@@ -197,4 +197,8 @@ export class CICSPlexTree extends TreeItem {
   getSession() {
     return this.parent.getSession();
   }
+
+  getSessionNode() {
+    return this.getParent();
+  }
 }

@@ -9,35 +9,37 @@
  *
  */
 
-import { commands, WebviewPanel, window } from "vscode";
+import { commands, TreeView, WebviewPanel, window } from "vscode";
 import { IResource } from "../doc";
 import { CICSRegionTree, CICSResourceContainerNode } from "../trees";
 import { getAttributesHtml } from "../utils/webviewHTML";
 
-export function getShowResourceAttributesCommand() {
+export function getShowResourceAttributesCommand(treeview: TreeView<CICSResourceContainerNode<IResource>>) {
   return commands.registerCommand("cics-extension-for-zowe.showResourceAttributes", (node: CICSResourceContainerNode<IResource>) => {
-    const resource = node.getContainedResource().resource.attributes;
-    const resourceName = node.getContainedResource().meta.getName(node.getContainedResource().resource);
-    const attributeHeadings = Object.keys(resource);
+    for (const res of [...new Set([...treeview.selection, node])]) {
+      const resource = res.getContainedResource().resource.attributes;
+      const resourceName = res.getContainedResource().meta.getName(res.getContainedResource().resource);
+      const attributeHeadings = Object.keys(resource);
 
-    let webText = `<thead><tr>`;
-    webText += `<th class="headingTH">Attribute <input type="text" id="searchBox" placeholder="Search Attribute..."/></th>`;
-    webText += `<th class="valueHeading">Value</th>`;
-    webText += `</tr></thead><tbody>`;
-    for (const heading of attributeHeadings) {
-      webText += `<tr><th class="colHeading">${heading.toUpperCase()}</th><td>${resource[heading as keyof IResource]}</td></tr>`;
+      let webText = `<thead><tr>`;
+      webText += `<th class="headingTH">Attribute <input type="text" id="searchBox" placeholder="Search Attribute..."/></th>`;
+      webText += `<th class="valueHeading">Value</th>`;
+      webText += `</tr></thead><tbody>`;
+      for (const heading of attributeHeadings) {
+        webText += `<tr><th class="colHeading">${heading.toUpperCase()}</th><td>${resource[heading as keyof IResource]}</td></tr>`;
+      }
+      webText += "</tbody>";
+
+      const webviewHTML = getAttributesHtml(resourceName, webText);
+      const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined;
+      const panel: WebviewPanel = window.createWebviewPanel(
+        "zowe",
+        `${res.getContainedResource().meta.resourceName} ${res.regionName}(${resourceName})`,
+        column || 1,
+        { enableScripts: true }
+      );
+      panel.webview.html = webviewHTML;
     }
-    webText += "</tbody>";
-
-    const webviewHTML = getAttributesHtml(resourceName, webText);
-    const column = window.activeTextEditor ? window.activeTextEditor.viewColumn : undefined;
-    const panel: WebviewPanel = window.createWebviewPanel(
-      "zowe",
-      `${node.getContainedResource().meta.resourceName} ${node.regionName}(${resourceName})`,
-      column || 1,
-      { enableScripts: true }
-    );
-    panel.webview.html = webviewHTML;
   });
 }
 

@@ -25,6 +25,7 @@ export class CICSResourceContainerNode<T extends IResource> extends CICSTreeNode
   cicsplexName: string;
 
   viewMore: boolean = false;
+  refreshingDescription: boolean = false;
 
   constructor(
     label: string | TreeItemLabel,
@@ -118,6 +119,13 @@ export class CICSResourceContainerNode<T extends IResource> extends CICSTreeNode
     if (moreToFetch) {
       this.children.push(new ViewMore(this));
     }
+
+    this.refreshingDescription = true;
+    this.description = `${
+      this.childResource.resources.isFilterApplied() ? this.childResource.resources.getFilter() : ""
+    } [${resources.length} of ${this.childResource.resources.getTotalResources()}]`;
+
+    this.getSessionNode().getParent()._onDidChangeTreeData.fire(this);
   }
 
   async getChildren(): Promise<(ICICSTreeNode | TextTreeItem)[]> {
@@ -129,6 +137,10 @@ export class CICSResourceContainerNode<T extends IResource> extends CICSTreeNode
 
     if (this.viewMore) {
       this.viewMore = false;
+      return this.children;
+    }
+    if (this.refreshingDescription) {
+      this.refreshingDescription = false;
       return this.children;
     }
 

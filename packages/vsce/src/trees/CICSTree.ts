@@ -71,7 +71,7 @@ export class CICSTree implements TreeDataProvider<CICSSessionTree> {
         const profileToLoad = await ProfileManagement.getProfilesCache().loadNamedProfile(profilename, "cics");
         // avoid accidental repeats
         if (!this.loadedProfiles.filter((sessionTree) => sessionTree.label === profilename).length) {
-          const newSessionTree = new CICSSessionTree(profileToLoad);
+          const newSessionTree = new CICSSessionTree(profileToLoad, this);
           this.loadedProfiles.push(newSessionTree);
         }
       } catch {
@@ -324,7 +324,7 @@ export class CICSTree implements TreeDataProvider<CICSSessionTree> {
 
     label = label.split(/ (.*)/)[1];
     const profileToLoad = await ProfileManagement.getProfilesCache().getLoadedProfConfig(label);
-    const newSessionTree = new CICSSessionTree(profileToLoad);
+    const newSessionTree = new CICSSessionTree(profileToLoad, this);
     this.loadedProfiles.push(newSessionTree);
     const persistentStorage = new PersistentStorage("zowe.cics.persistent");
     await persistentStorage.addLoadedCICSProfile(label);

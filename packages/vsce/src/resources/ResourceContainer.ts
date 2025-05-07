@@ -11,11 +11,11 @@
 
 import { CicsCmciConstants, getCache } from "@zowe/cics-for-zowe-sdk";
 import { IResource, IResourceMeta } from "../doc";
+import { PersistentStorage } from "../utils/PersistentStorage";
 import { toArray } from "../utils/commandUtils";
 import { runGetResource } from "../utils/resourceUtils";
 import { CICSSession } from "./CICSSession";
 import { Resource } from "./Resource";
-import { PersistentStorage } from "../utils/PersistentStorage";
 
 export class ResourceContainer<T extends IResource> {
   resources: Resource<T>[] | undefined;
@@ -25,6 +25,7 @@ export class ResourceContainer<T extends IResource> {
   private startIndex: number;
   private fetchedAll: boolean = false;
   private numberToFetch: number;
+  private totalResources: number = 0;
 
   private filterApplied: boolean;
 
@@ -35,6 +36,10 @@ export class ResourceContainer<T extends IResource> {
     this.resetCriteria();
     this.resetContainer();
     this.resetNumberToFetch();
+  }
+
+  getTotalResources() {
+    return this.totalResources;
   }
 
   getMeta() {
@@ -56,6 +61,10 @@ export class ResourceContainer<T extends IResource> {
   setCriteria(criteria: string[]) {
     this.criteria = this.resourceMeta.buildCriteria(criteria, this.resource?.attributes);
     this.filterApplied = true;
+  }
+
+  getFilter() {
+    return this.criteria;
   }
 
   resetContainer() {
@@ -107,6 +116,7 @@ export class ResourceContainer<T extends IResource> {
         return [[], !this.fetchedAll];
       }
       this.cacheToken = cacheResponse.response.resultsummary.cachetoken;
+      this.totalResources = parseInt(cacheResponse.response.resultsummary.recordcount);
     }
 
     // Retrieve a set of results from the cache

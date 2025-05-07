@@ -56,7 +56,7 @@ export const getCommands = (treeDataProv: CICSTree, treeview: TreeView<any>) => 
     getPurgeTaskCommand(treeDataProv, treeview),
 
     showLogsCommands.getShowRegionLogs(treeview),
-    showAttributesCommands.getShowResourceAttributesCommand(),
+    showAttributesCommands.getShowResourceAttributesCommand(treeview),
     showAttributesCommands.getShowRegionAttributes(),
 
     getShowRegionSITParametersCommand(),

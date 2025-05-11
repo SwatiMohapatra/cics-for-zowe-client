@@ -11,7 +11,7 @@
 
 import { Gui, imperative } from "@zowe/zowe-explorer-api";
 import { TreeItemCollapsibleState, TreeItemLabel } from "vscode";
-import { CICSPlexTree } from ".";
+import { CICSPlexTree, CICSTree } from ".";
 import { ICICSTreeNode, IChildResource, IContainedResource, IResource } from "../doc";
 import { CICSSession, ResourceContainer } from "../resources";
 import IconBuilder from "../utils/IconBuilder";
@@ -125,7 +125,7 @@ export class CICSResourceContainerNode<T extends IResource> extends CICSTreeNode
       this.childResource.resources.isFilterApplied() ? this.childResource.resources.getFilter() : ""
     } [${resources.length} of ${this.childResource.resources.getTotalResources()}]`;
 
-    this.getSessionNode().getParent()._onDidChangeTreeData.fire(this);
+    (this.getSessionNode().getParent() as CICSTree)._onDidChangeTreeData.fire(this);
   }
 
   async getChildren(): Promise<(ICICSTreeNode | TextTreeItem)[]> {

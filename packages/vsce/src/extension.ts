@@ -19,6 +19,7 @@ import { getZoweExplorerVersion } from "./utils/workspaceUtils";
 import { getCommands } from "./commands";
 import { CICSMessages } from "./constants/CICS.messages";
 import { CICSLogger } from "./utils/CICSLogger";
+import ResourceInspectorExtender from "./utils/ResourceInspectorExtender";
 
 /**
  * Initializes the extension
@@ -116,6 +117,10 @@ export async function activate(context: ExtensionContext) {
   });
 
   context.subscriptions.concat(getCommands(treeDataProv, treeview));
+
+  return {
+    resourceInspector: ResourceInspectorExtender,
+  };
 }
 
 export async function deactivate(): Promise<void> {

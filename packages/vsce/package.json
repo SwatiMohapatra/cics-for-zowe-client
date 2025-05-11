@@ -15,10 +15,7 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onCommand:cics-extension-for-zowe.addSession",
-    "onView:cics-view"
-  ],
+  "activationEvents": [],
   "extensionDependencies": [
     "Zowe.vscode-extension-for-zowe"
   ],

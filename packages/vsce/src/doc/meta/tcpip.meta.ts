@@ -17,7 +17,7 @@ import { IResourceMeta } from "./IResourceMeta";
 
 export const TCPIPMeta: IResourceMeta<ITCPIP> = {
   resourceName: CicsCmciConstants.CICS_TCPIPSERVICE_RESOURCE,
-  humanReadableName: "TCPIP Services",
+  humanReadableName: "TCP/IP Services",
 
   buildCriteria(criteria: string[]) {
     return criteria.map((n) => `name=${n}`).join(" OR ");

@@ -39,10 +39,10 @@ export class CICSSessionTree extends TreeItem {
   }
 
   public createSessionFromProfile() {
-    this.session = new imperative.Session({
-      type: SessConstants.AUTH_TYPE_TOKEN,
+    this.session = new CICSSession({
+      type: imperative.SessConstants.AUTH_TYPE_TOKEN,
       storeCookie: true,
-      tokenType: SessConstants.TOKEN_TYPE_LTPA,
+      tokenType: imperative.SessConstants.TOKEN_TYPE_LTPA,
       hostname: this.profile.profile!.host,
       port: Number(this.profile.profile!.port),
       user: this.profile.profile!.user || "",

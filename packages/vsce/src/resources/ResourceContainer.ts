@@ -16,6 +16,8 @@ import { toArray } from "../utils/commandUtils";
 import { runGetResource } from "../utils/resourceUtils";
 import { CICSSession } from "./CICSSession";
 import { Resource } from "./Resource";
+import { imperative } from "@zowe/zowe-explorer-api";
+import constants from "../constants/CICS.defaults";
 
 export class ResourceContainer<T extends IResource> {
   resources: Resource<T>[] | undefined;
@@ -119,33 +121,52 @@ export class ResourceContainer<T extends IResource> {
       this.totalResources = parseInt(cacheResponse.response.resultsummary.recordcount);
     }
 
-    // Retrieve a set of results from the cache
-    const { response } = await getCache(
-      cicsSession,
-      {
-        cacheToken: this.cacheToken,
-        startIndex: this.startIndex,
-        count: this.numberToFetch,
-        nodiscard: true,
-        summonly: false,
-      },
-      {
-        failOnNoData: false,
-        useCICSCmciRestError: true,
+    try {
+      // Retrieve a set of results from the cache
+      const { response } = await getCache(
+        cicsSession,
+        {
+          cacheToken: this.cacheToken,
+          startIndex: this.startIndex,
+          count: this.numberToFetch,
+          nodiscard: true,
+          summonly: false,
+        },
+        {
+          failOnNoData: false,
+          useCICSCmciRestError: true,
+        }
+      );
+
+      // Find out if there are more resources to fetch later
+      this.startIndex += this.numberToFetch;
+      if (this.startIndex > parseInt(response.resultsummary.recordcount)) {
+        this.fetchedAll = true;
+        await getCache(cicsSession, { cacheToken: this.cacheToken, nodiscard: false, summonly: true });
       }
-    );
 
-    // Find out if there are more resources to fetch later
-    this.startIndex += this.numberToFetch;
-    if (this.startIndex > parseInt(response.resultsummary.recordcount)) {
-      this.fetchedAll = true;
-      await getCache(cicsSession, { cacheToken: this.cacheToken, nodiscard: false, summonly: true });
+      const currentResources = this.resources;
+      const newResources = toArray(response.records[this.resourceMeta.resourceName.toLowerCase()]).map((res: T) => new Resource(res));
+
+      this.resources = [...currentResources, ...newResources];
+
+    } catch (error) {
+      if (
+        error instanceof imperative.RestClientError &&
+        // errorCode doc'd as string but is number
+        parseInt(`${error.errorCode}`) === constants.HTTP_ERROR_NOT_FOUND &&
+        error.message.includes("The result cache token could not be found")
+      ) {
+        // Request is okay but cache not present. Regenerate cache and calculate how many resources to get
+        // to 'roughly' make the tree back to the same size [length of tree without newly added resources + pagination count]
+        this.cacheToken = null;
+        this.startIndex = 1;
+        this.numberToFetch = this.resources.length + this.numberToFetch;
+        this.resources = [];
+        return this.loadResources(cicsSession, regionName, cicsplexName);
+      }
+      throw error;
     }
-
-    const currentResources = this.resources;
-    const newResources = toArray(response.records[this.resourceMeta.resourceName.toLowerCase()]).map((res: T) => new Resource(res));
-
-    this.resources = [...currentResources, ...newResources];
 
     return [this.resources, !this.fetchedAll];
   }

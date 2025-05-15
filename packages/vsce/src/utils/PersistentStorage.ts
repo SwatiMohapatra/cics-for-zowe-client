@@ -472,7 +472,7 @@ export class PersistentStorage {
   }
 
   public static async getNumberOfResourcesToFetch(): Promise<number> {
-    const configKey = `zowe.cics.resources.recordCountIncrement`;
+    const configKey = `zowe.cics.resourcePageCount`;
     const valFromConfig = await workspace.getConfiguration().get(configKey);
 
     if (!valFromConfig) {

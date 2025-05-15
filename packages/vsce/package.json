@@ -423,7 +423,7 @@
           "description": "Default filter criteria for Web Service",
           "scope": "window"
         },
-        "zowe.cics.resources.recordCountIncrement": {
+        "zowe.cics.resourcePageCount": {
           "type": "number",
           "default": 10,
           "description": "How many records to fetch per page of resources",

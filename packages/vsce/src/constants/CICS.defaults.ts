@@ -50,7 +50,7 @@ export default {
   /**
    * Default number of resources on each page, pulled from package.json
    */
-  DEFAULT_RESOURCE_PAGE_SIZE: meta.contributes.configuration.properties["zowe.cics.resources.recordCountIncrement"].default,
+  DEFAULT_RESOURCE_PAGE_SIZE: meta.contributes.configuration.properties["zowe.cics.resourcePageCount"].default,
 
   /**
    * Default resource filters pulled from package.json where configuration is specified
